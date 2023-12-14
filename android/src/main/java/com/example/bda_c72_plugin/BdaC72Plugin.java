@@ -54,8 +54,8 @@ public class BdaC72Plugin implements FlutterPlugin, MethodCallHandler {
     initConnectedEvent(registrar.messenger());
     initReadEvent(registrar.messenger());
     channel.setMethodCallHandler(new BdaC72Plugin());
-
-    UHFHelper.getInstance().init();
+    Context context = registrar.context();
+    UHFHelper.getInstance().init(context);
     UHFHelper.getInstance().setUhfListener(new UHFListener() {
       @Override
       public void onRead(String tagsJson) {
