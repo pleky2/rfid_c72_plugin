@@ -17,7 +17,6 @@ void main() {
   });
 
   test('getPlatformVersion', () async {
-    BdaC72Plugin bdaC72Plugin = BdaC72Plugin();
     MockBdaC72PluginPlatform fakePlatform = MockBdaC72PluginPlatform();
     BdaC72PluginPlatform.instance = fakePlatform;
   });

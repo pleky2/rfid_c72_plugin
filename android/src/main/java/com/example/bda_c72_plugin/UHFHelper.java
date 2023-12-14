@@ -20,6 +20,10 @@ import java.util.Objects;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter; 
 
+import com.example.bda_c72_plugin.R;
+import android.media.MediaPlayer;
+import android.content.Context;
+
 public class UHFHelper {
     private static UHFHelper instance;
     public RFIDWithUHFUART mReader;
@@ -30,13 +34,14 @@ public class UHFHelper {
     private boolean isConnect = false;
     //private boolean isSingleRead = false;
     private HashMap<String, EPC> tagList;
-
-    private UHFHelper() {
-    }
+    private Context context;
+    private MediaPlayer mediaPlayer;
+    private UHFHelper() {}
 
     public static UHFHelper getInstance() {
-        if (instance == null)
-            instance = new UHFHelper();
+        if (instance == null) {
+             instance = new UHFHelper();
+        }
         return instance;
     }
 
@@ -48,9 +53,9 @@ public class UHFHelper {
         this.uhfListener = uhfListener;
     }
 
-    public void init() {
-        // this.context = context;
-        //this.uhfListener = uhfListener;
+    public void init(Context ctx) {
+        this.context = ctx;
+        mediaPlayer = MediaPlayer.create(ctx, R.raw.barcodebeep); 
         tagList = new HashMap<String, EPC>();
         clearData();
         handler = new Handler() {
@@ -91,6 +96,9 @@ public class UHFHelper {
                 if (strUII != null) {
                     String strEPC = strUII.getEPC();
                     addEPCToList(strEPC, strUII.getRssi());
+                    if (mediaPlayer != null) {
+                        mediaPlayer.start();
+                    }
                     return true;
                 } else {
                     return false;
@@ -139,6 +147,14 @@ public class UHFHelper {
             return mReader.setPower(Integer.parseInt(level));
         }
         return false;
+    }
+
+    public int getPowerLevel() {
+        if (mReader != null) {
+            return mReader.getPower();
+        }
+
+        return -1;
     }
 
     public boolean setWorkArea(String area) {
@@ -238,8 +254,10 @@ public class UHFHelper {
                     }
                     Log.i("data", "c" + res.getEPC() + "|" + strResult);
                     Message msg = handler.obtainMessage();
-                    msg.obj = strResult + "EPC:" + res.getEPC() + "@" + res.getRssi();
-
+                    msg.obj = strResult + res.getEPC() + "@" + res.getRssi();
+                    if (mediaPlayer != null) {
+                        mediaPlayer.start();
+                    }
                     handler.sendMessage(msg);
                 }
             }

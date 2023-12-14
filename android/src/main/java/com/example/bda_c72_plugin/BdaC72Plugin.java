@@ -15,9 +15,11 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
 
+import android.content.Context;
+
 /** BdaC72Plugin */
 public class BdaC72Plugin implements FlutterPlugin, MethodCallHandler {
- private static final String CHANNEL_IsStarted = "isStarted";
+  private static final String CHANNEL_IsStarted = "isStarted";
   private static final String CHANNEL_StartSingle = "startSingle";
   private static final String CHANNEL_StartContinuous = "startContinuous";
   private static final String CHANNEL_Stop = "stop";
@@ -27,15 +29,17 @@ public class BdaC72Plugin implements FlutterPlugin, MethodCallHandler {
   private static final String CHANNEL_Connect = "connect";
   private static final String CHANNEL_IsConnected = "isConnected";
   private static final String CHANNEL_SETPOWERLEVEL = "setPowerLevel";
+  private static final String CHANNEL_GETPOWERLEVEL = "getPowerLevel";
   private static final String CHANNEL_SETWORKAREA = "setWorkArea";
   private static final String CHANNEL_ConnectedStatus = "ConnectedStatus";
   private static final String CHANNEL_TagsStatus = "TagsStatus";
   private static final String CHANNEL_DeviceId = "deviceId";
   private static final String CHANNEL_GetDeviceModel = "getDeviceModel";
   private static final String CHANNEL_GetPlatform = "getPlatform";
+  private static final String CHANNEL_Free = "free";
   private static PublishSubject<Boolean> connectedStatus = PublishSubject.create();
   private static PublishSubject<String> tagsStatus = PublishSubject.create();
-
+  private Context context;
   // This static function is optional and equivalent to onAttachedToEngine. It supports the old
   // pre-Flutter-1.12 Android projects. You are encouraged to continue supporting
   // plugin registration via this function while apps migrate to use the new Android APIs
@@ -69,11 +73,12 @@ public class BdaC72Plugin implements FlutterPlugin, MethodCallHandler {
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
     final MethodChannel channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "bda_c72_plugin");
+    this.context = flutterPluginBinding.getApplicationContext();
     initConnectedEvent(flutterPluginBinding.getBinaryMessenger());
     initReadEvent(flutterPluginBinding.getBinaryMessenger());
 
     channel.setMethodCallHandler(new BdaC72Plugin());
-    UHFHelper.getInstance().init();
+    UHFHelper.getInstance().init(this.context);
     UHFHelper.getInstance().setUhfListener(new UHFListener() {
       @Override
       public void onRead(String tagsJson) {
@@ -206,6 +211,9 @@ public class BdaC72Plugin implements FlutterPlugin, MethodCallHandler {
       case CHANNEL_SETPOWERLEVEL:
         String powerLevel = call.argument("value");
         result.success(UHFHelper.getInstance().setPowerLevel(powerLevel));
+        break;
+      case CHANNEL_GETPOWERLEVEL:
+        result.success(UHFHelper.getInstance().getPowerLevel());
         break;
       case CHANNEL_SETWORKAREA:
         String workArea = call.argument("value");

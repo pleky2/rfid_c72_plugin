@@ -61,6 +61,10 @@ class BdaC72Plugin {
     return _channel.invokeMethod('setPowerLevel', <String, String>{'value': value});
   }
 
+  static Future<int?> getPowerLevel() async {
+    return _channel.invokeMethod('getPowerLevel');
+  }
+
   static Future<bool?> setWorkArea(String value) async {
     return _channel.invokeMethod('setWorkArea', <String, String>{'value': value});
   }
